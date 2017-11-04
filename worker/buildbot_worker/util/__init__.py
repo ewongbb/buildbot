@@ -75,6 +75,30 @@ class Obfuscated(object):
         return str(s)
 
     @staticmethod
+    def quoted_cmd(command):
+        rv = command
+        if instance(rv, str):
+            rvlist = rv.split(' ')
+        elif isinstance(rv, int):
+            rvlist = [rv]
+        else:
+            rvlist = rv
+        use_idx = None
+        i = 0
+        while not use_idx and i < len(rvlist):
+            for suffix in (".exe", ".bat"):
+                if isinstance(rvlist[i], str) and rvlist[i].endswith(suffix)):
+                    use_idx = i
+            i += 1
+        if use_idx is not None:
+            if isinstance(rv, list):
+                rv[use_idx] = '"%s"' % rv[use_idx]
+            else:
+                rv = '"%s" %s' % (' '.join(rvlist[:use_idx + 1]),
+                                  ' '.join(rvlist[use_idx + 1:]))
+        return rv
+
+    @staticmethod
     def get_real(command):
         rv = command
         if isinstance(command, list):
